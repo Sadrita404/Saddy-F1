@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python F1 Infinite Racer</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            background: #222;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+        #game-container {
+            position: relative;
+            border: 4px solid #444;
+            background: #333;
+        }
+        canvas {
+            display: block;
+            background: #555; /* Road Color */
+        }
+        .ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            pointer-events: none;
+        }
+        #instructions {
+            margin-top: 10px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>F1 Python Racer</h2>
+    <div id="game-container">
+        <div class="ui">
+            Score: <span id="score">0</span>
+        </div>
+        <canvas id="gameCanvas" width="400" height="600"></canvas>
+    </div>
+    <p id="instructions">Use LEFT and RIGHT arrow keys to move</p>
+
+    <script type="py">
+        import asyncio
+        from js import document, window
+        from pyodide.ffi import create_proxy
+        import random
+
+        # Canvas Setup
+        canvas = document.getElementById("gameCanvas")
+        ctx = canvas.getContext("2d")
+        
+        # Game State
+        car_x = 175
+        car_y = 500
+        car_width = 50
+        car_height = 80
+        
+        obstacles = []
+        score = 0
+        game_running = True
+        keys = {}
+
+        def handle_keydown(event):
+            keys[event.code] = True
+
+        def handle_keyup(event):
+            keys[event.code] = False
+
+        # Register keyboard events
+        document.addEventListener("keydown", create_proxy(handle_keydown))
+        document.addEventListener("keyup", create_proxy(handle_keyup))
+
+        async def main():
+            global car_x, score, game_running
+            
+            while True:
+                if game_running:
+                    # 1. Logic: Move Car
+                    if keys.get("ArrowLeft") and car_x > 0:
+                        car_x -= 7
+                    if keys.get("ArrowRight") and car_x < canvas.width - car_width:
+                        car_x += 7
+
+                    # 2. Logic: Obstacles
+                    if random.random() < 0.02:
+                        obs_x = random.randint(0, canvas.width - 50)
+                        obstacles.append([obs_x, -100])
+
+                    for obs in obstacles:
+                        obs[1] += 5 # Move down
+                        
+                        # Collision detection
+                        if (car_y < obs[1] + 50 and car_y + car_height > obs[1] and
+                            car_x < obs[0] + 50 and car_x + car_width > obs[0]):
+                            game_running = False
+                            window.alert(f"Game Over! Final Score: {score}")
+                            window.location.reload()
+
+                    # Filter out off-screen obstacles
+                    obstacles[:] = [obs for obs in obstacles if obs[1] < canvas.height]
+                    score += 1
+                    document.getElementById("score").innerText = str(score // 10)
+
+                    # 3. Draw Everything
+                    ctx.clearRect(0, 0, canvas.width, canvas.height)
+                    
+                    # Draw Road Lines
+                    ctx.strokeStyle = "white"
+                    ctx.setLineDash([20, 20])
+                    ctx.beginPath()
+                    ctx.moveTo(canvas.width/2, 0)
+                    ctx.lineTo(canvas.width/2, canvas.height)
+                    ctx.stroke()
+
+                    # Draw F1 Car (Simple Body)
+                    ctx.fillStyle = "red"
+                    ctx.fillRect(car_x, car_y, car_width, car_height)
+                    # Tires
+                    ctx.fillStyle = "black"
+                    ctx.fillRect(car_x - 5, car_y + 10, 10, 20)
+                    ctx.fillRect(car_x + car_width - 5, car_y + 10, 10, 20)
+                    ctx.fillRect(car_x - 5, car_y + 50, 10, 20)
+                    ctx.fillRect(car_x + car_width - 5, car_y + 50, 10, 20)
+
+                    # Draw Obstacles
+                    ctx.fillStyle = "orange"
+                    for obs in obstacles:
+                        ctx.fillRect(obs[0], obs[1], 50, 50)
+
+                await asyncio.sleep(0.016) # Roughly 60 FPS
+
+        # Start the game loop
+        asyncio.ensure_future(main())
+    </script>
+</body>
+</html>
