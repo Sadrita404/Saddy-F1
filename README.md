@@ -1,5 +1,10 @@
 # Saddy-F1
 
+|Title | Saddy-F1|
+| :-- | :-- |
+|Author | Sadrita Neogi|
+|Platform | [Beest](https://beest.hackclub.com/)|
+
 ## [LIVE URL](https://saddy-f1.vercel.app/)
 
 #### This is an web based high-speed 3D racing game set in a neon-lit cyberpunk city. Compete against smart AI across procedurally generated tracks, utilizing realistic car physics, nitro boosts, and dynamic visuals.
@@ -14,3 +19,4 @@
 
 ---
 
+## Under Hack Club
