@@ -14,6 +14,19 @@
   |HTML|
   |:--|
 
+  ---
+
+## Controls
+The game uses standard **WASD** mapping for intuitive handling. 
+
+* **W** : Accelerate
+* **A** : Steer Left
+* **S** : Brake / Reverse
+* **D** : Steer Right
+* **Shiftr** : Nitro Boost
+* **M** : For new Car
+
+---
 
 ## Project Screenshot
 
